@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Create a hover effect</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.9.1/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.9.1/mapbox-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf"></script>
+<style>
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+.filter-group {
+    font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-weight: 600;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+    border-radius: 3px;
+    width: 120px;
+    color: #fff;
+}
+.filter-group input[type='checkbox']:first-child + label {
+    border-radius: 3px 3px 0 0;
+}
+.filter-group label:last-child {
+    border-radius: 0 0 3px 3px;
+    border: none;
+}
+.filter-group input[type='checkbox'] {
+    display: none;
+}
+.filter-group input[type='checkbox'] + label {
+    background-color: #3386c0;
+    display: block;
+    cursor: pointer;
+    padding: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+}
+.filter-group input[type='checkbox']:checked + label {
+    background-color: #4ea0da;
+}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<nav id="filter-group" class="filter-group"></nav>
+
+<script>
+	mapboxgl.accessToken = 'pk.eyJ1IjoiY21jY2FsbW9udCIsImEiOiJjbTU1cjRrZDQwcXFhMmlyMzRmcXQ2czlsIn0.geuByGMLkRs6ZBQoF8MWzw';
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [-1.910625, 52.682557],
+        zoom: 6
+    });
+    let hoveredPolygonId = null;
+
+    const filterGroup = document.getElementById('filter-group');
+
+    map.on('load', () => {
+        map.addSource('Counties', {
+            'type': 'vector',
+            'url': 'mapbox://cmccalmont.8j3gbo0v'
+        });
+
+        map.addLayer({
+            'id': 'county-fills',
+            'type': 'fill',
+            'source': 'Counties',
+            'source-layer': 'lad2_data_converted2-beotxz',
+            'layout': {},
+            'paint': {
+                'fill-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['+',
+                        ['get', 'population'],
+                        ['get', 'robbery']
+                    ],
+                    0, '#FFEDA0',
+                    1000, 'red',
+                    50000, 'yellow',
+                    100000, 'green'
+                ],
+                'fill-opacity': 0.3
+            }
+        });
+
+        map.addLayer({
+            'id': 'county-borders',
+            'type': 'line',
+            'source': 'Counties',
+            'source-layer': 'lad2_data_converted2-beotxz',
+            'layout': {},
+            'paint': {
+                'line-color': 'black',
+                'line-width': 2
+            }
+        });
+
+        map.on('click', 'county-fills', (e) => {
+            const feature = e.features[0];
+            let coordinates = feature.geometry.coordinates;
+
+            if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
+                coordinates = feature.geometry.coordinates[0];
+            }
+
+            const population = feature.properties.population;
+
+            const description = `Population: ${population}`;
+
+            const lngLat = (coordinates.length > 1)
+                ? turf.centroid(feature).geometry.coordinates
+                : coordinates;
+
+            new mapboxgl.Popup()
+                .setLngLat(lngLat)
+                .setHTML(description)
+                .addTo(map);
+        });
+
+        map.on('mouseenter', 'county-fills', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        map.on('mouseleave', 'county-fills', () => {
+            map.getCanvas().style.cursor = '';
+        });
+
+
+    });
+</script>
+
+</body>
+</html>
