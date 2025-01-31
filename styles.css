@@ -21,15 +21,23 @@ body {
     color: white;
     padding: 10px;
     border-radius: 5px;
+    margin-bottom: 16px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.dropdown-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 
 .filter-group {
     font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     font-weight: 600;
     position: absolute;
-    top: 60px; /* Positioned below filter-container */
-    left: 10px; /* Align to the left */
+    top: 240px;
+    left: 10px;
     z-index: 1;
     border-radius: 3px;
     width: 120px;
@@ -59,4 +67,52 @@ body {
 
 .filter-group input[type='checkbox']:checked + label {
     background-color: green;
+}
+
+
+
+
+.loading-spinner {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 1000;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+
+#toggle-description {
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+#map-description {
+    background: grey;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    display: none;
+    max-width: 250px;
+    z-index: 10;
+}
+
+#toggle-description:hover {
+    background: #666;
 }
