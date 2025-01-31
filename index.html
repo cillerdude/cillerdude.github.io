@@ -15,12 +15,30 @@
 		<label for="data-source-select">Select Data Source:</label>
 		<select id="data-source-select">
 			<option value="Counties">Counties</option>
-			<option value="LSOA">LSOA</option>
-			<option value="Ward">Ward</option>
+			<option value="Ward">Middle layer (Ward)</option>
+			<option value="LSOA">Detailed view (LSOA)</option>
 		</select>
+		<button id="toggle-description">▼</button>
+		<p id="map-description" class="map-description">
+			This map displays crime rates between November 2023 - November 2024.<br>
+			Greater Manchester police declined a data request, as such their data is missing.<br>
+			Counties offer a broad overview, Wards provide a middle level of detail, and LSOA gives the most detailed breakdown.
+		</p>
+		<div id="loading-spinner" class="loading-spinner"></div>
 	</div>
 	<nav id="filter-group" class="filter-group"></nav>
 <script>
+	document.getElementById('toggle-description').addEventListener('click', function() {
+		const description = document.getElementById('map-description');
+		if (description.style.display === 'none' || description.style.display === '') {
+			description.style.display = 'block';
+			this.textContent = '▲'; // Arrow up when expanded
+		} else {
+			description.style.display = 'none';
+			this.textContent = '▼'; // Arrow down when collapsed
+		}
+	});
+
     mapboxgl.accessToken = 'pk.eyJ1IjoiY21jY2FsbW9udCIsImEiOiJjbTU1cjRrZDQwcXFhMmlyMzRmcXQ2czlsIn0.geuByGMLkRs6ZBQoF8MWzw';
     const map = new mapboxgl.Map({
         container: 'map',
@@ -46,6 +64,58 @@
         { key: 'Vehicle crime', label: 'Vehicle crime' },
         { key: 'Violence and sexual offences', label: 'Violence and sexual offences' }
     ];
+
+    const lookupTable = {
+		LSOA: {
+			"Anti-social behaviour": {perc10: 0.00306513409961686, perc50: 0.0166995701779164, perc90: 0.0276752767527675 },
+			"Bicycle theft": {perc10: 0, perc50: 0.00106512955501129, perc90: 0.0018450184501845 },
+			"Burglary": {perc10: 0.000766283524904215, perc50: 0.00448446359346536, perc90: 0.00738007380073801 },
+			"Criminal damage and arson": {perc10: 0.00229885057471264, perc50: 0.00818898479840214, perc90: 0.0129151291512915 },
+			"Drugs": {perc10: 0, perc50: 0.00306782647963119, perc90: 0.00507380073800738 },
+			"Other crime": {perc10: 0, perc50: 0.00217539714585624, perc90: 0.003690036900369 },
+			"Other theft": {perc10: 0.00153256704980843, perc50: 0.00795462331976725, perc90: 0.0115313653136531 },
+			"Possession of weapons": {perc10: 0, perc50: 0.000971992475888096, perc90: 0.0018450184501845 },
+			"Public order": {perc10: 0.00153256704980843, perc50: 0.00771059579502704, perc90: 0.0119926199261993 },
+			"Robbery": {perc10: 0, perc50: 0.00140515575879432, perc90: 0.00276752767527675 },
+			"Shoplifting": {perc10: 0, perc50: 0.00878143077596503, perc90: 0.0170664206642066 },
+			"Theft from the person": {perc10: 0, perc50: 0.00253854187768559, perc90: 0.0018450184501845 },
+			"Vehicle crime": {perc10: 0.000766283524904215, perc50: 0.00646962536843284, perc90: 0.0106088560885609 },
+			"Violence and sexual offences": {perc10: 0.0130268199233716, perc50: 0.0370560286600785, perc90: 0.0548892988929889 }
+		},
+		Ward: {
+			"Anti-social behaviour": {perc10: 0.00576036866359447, perc50: 0.0166995703782776, perc90: 0.0216994382022472 },
+			"Bicycle theft": {perc10: 0, perc50: 0.00106512959885317, perc90: 0.00140449438202247 },
+			"Burglary": {perc10: 0.00192012288786482, perc50: 0.00448446342647573, perc90: 0.00589887640449438 },
+			"Criminal damage and arson": {perc10: 0.00384024577572965, perc50: 0.00818898462040925, perc90: 0.00976123595505618 },
+			"Drugs": {perc10: 0.000384024577572965, perc50: 0.00306782672027993, perc90: 0.00407303370786517 },
+			"Other crime": {perc10: 0.000768049155145929, perc50: 0.00217539725720443, perc90: 0.00252808988764045 },
+			"Other theft": {perc10: 0.00345622119815668, perc50: 0.00795462330076949, perc90: 0.00912921348314607 },
+			"Possession of weapons": {perc10: 0, perc50: 0.000971992305685301, perc90: 0.0011938202247191 },
+			"Public order": {perc10: 0.00307219662058372, perc50: 0.00771059576241044, perc90: 0.00941011235955056 },
+			"Robbery": {perc10: 0, perc50: 0.00140515598776184, perc90: 0.00196629213483146 },
+			"Shoplifting": {perc10: 0, perc50: 0.00878143084836358, perc90: 0.0129213483146067 },
+			"Theft from the person": {perc10: 0, perc50: 0.00253854207137589, perc90: 0.00140449438202247 },
+			"Vehicle crime": {perc10: 0.00153609831029186, perc50: 0.0064696253657251, perc90: 0.00919943820224719 },
+			"Violence and sexual offences": {perc10: 0.0188172043010753, perc50: 0.0370560288101791, perc90: 0.0436095505617978 }
+		},
+		Counties: {
+			"Anti-social behaviour": {perc10: 0.00925179742435016, perc50: 0.0166995703661506, perc90: 0.0220486843059784 },
+			"Bicycle theft": {perc10: 0.000259596609442545, perc50: 0.00106512964510109, perc90: 0.00150338147007215 },
+			"Burglary": {perc10: 0.00286346347024233, perc50: 0.00448446345266092, perc90: 0.00582108819564781 },
+			"Criminal damage and arson": {perc10: 0.00557229765572975, perc50: 0.0081889845629529, perc90: 0.00910406295444053 },
+			"Drugs": {perc10: 0.00139279224370478, perc50: 0.00306782671737059, perc90: 0.00412375139357968 },
+			"Other crime": {perc10: 0.00162981523493493, perc50: 0.00217539722183895, perc90: 0.0023699581098977 },
+			"Other theft": {perc10: 0.00493007821758711, perc50: 0.00795462323707975, perc90: 0.00966407482851344 },
+			"Possession of weapons": {perc10: 0.000575627264416077, perc50: 0.000971992304532215, perc90: 0.00105355079398757 },
+			"Public order": {perc10: 0.00477432025192158, perc50: 0.00771059572956481, perc90: 0.00818224395088529 },
+			"Robbery": {perc10: 0.000244923757604488, perc50: 0.0014051559597323, perc90: 0.00220969454918741 },
+			"Shoplifting": {perc10: 0.00454858406979763, perc50: 0.00878143086382442, perc90: 0.00954084186327029 },
+			"Theft from the person": {perc10: 0.000237022991230149, perc50: 0.00253854211525649, perc90: 0.00215475571492876 },
+			"Vehicle crime": {perc10: 0.00254856149617942, perc50: 0.00646962530087883, perc90: 0.00919360414839799 },
+			"Violence and sexual offences": {perc10: 0.0258501788959243, perc50: 0.0370560288423063, perc90: 0.0401463254874 }
+		}
+	};
+
 
     let filters = fields.reduce((acc, field) => {
         acc[field.key] = false;
@@ -78,28 +148,11 @@
             'source': source.id,
             'source-layer': source.sourceLayer,
             'layout': {},
-            'paint': {
-                'fill-color': [
-                    'interpolate',
-                    ['linear'],
-                    [
-                        '/',
-                        ['+',
-                            ...fields.map(field =>
-                                filters[field.key]
-                                    ? ['coalesce', ['to-number', ['get', field.key]], 0]
-                                    : 0
-                            )
-                        ],
-                        ['coalesce', ['to-number', ['get', 'population']], 1]
-                    ],
-                    0.05, 'rgba(0, 128, 0, 1)',
-                    0.1, 'rgba(255, 255, 0, 1)',
-                    0.15, 'rgba(255, 0, 0, 1)'
-                ],
-                'fill-opacity': 0.3
-            }
-        });
+            'paint': {'fill-color': ['interpolate', ['linear'],
+                    ['/', ['+', ...fields.map(field => filters[field.key]
+                                    ? ['coalesce', ['to-number', ['get', field.key]], 0]: 0)], ['coalesce', ['to-number', ['get', 'population']], 1]],
+                    0, 'rgba(0, 128, 0, 1)', 0.05, 'rgba(255, 255, 0, 1)', 0.15, 'rgba(255, 0, 0, 1)'],
+                'fill-opacity': 0.2}});
 
         map.addLayer({
             'id': `${source.id}-borders`,
@@ -149,16 +202,16 @@
                 .filter(field => filters[field.key])
                 .reduce((sum, field) => sum + (feature.properties[field.key] || 0), 0);
             const population = feature.properties.population || 0;
-            const crimePerPerson = population > 0 ? (allCrime / population).toFixed(3) : 0;
+			const crimePerPerson = population > 0 ? ((allCrime / population) * 1000).toFixed(1) : 0;
 
-            // Generate popup description dynamically
-            let description = `<strong>Area Name: ${areaName}</strong><br>`;
+            let description = `<strong>Area Name: ${areaName}</strong><br><hr>`;
             description += fields
                 .filter(field => filters[field.key])
                 .map(field => `${field.label}: ${feature.properties[field.key] || 0}`)
                 .join('<br>');
             description += `<br><strong>All Crime: ${allCrime}</strong>`;
-            description += `<br><strong>Crime per Person per Year: ${crimePerPerson}</strong>`;
+            description += `<br><strong>Population: ${population}</strong><hr>`;
+            description += `<strong>Crime </strong>(per 1000 per year): <strong>${crimePerPerson}</strong>`;
 
             new mapboxgl.Popup()
                 .setLngLat(coordinates)
@@ -190,39 +243,31 @@
         const sourceId = currentSource.id.split('-')[0];
         const features = map.queryRenderedFeatures({ layers: [`${sourceId}-fills`] });
 
-        const crimePerPersonValues = features.map(f => {
-            const allCrime = fields
-                .filter(field => filters[field.key])
-                .reduce((sum, field) => sum + (f.properties[field.key] || 0), 0);
-            const population = f.properties.population || 0;
-            return population > 0 ? (allCrime / population) : 0;
-        });
+        const selectedFilters = fields
+			.filter(field => filters[field.key])  // Selected fields from your filter
+			.map(field => field.key);  // Example: ['drugs', 'shoplifting']
 
-        const perc10 = calculatePercentile(crimePerPersonValues, 10);
-        const perc50 = calculatePercentile(crimePerPersonValues, 50);
-        const perc90 = calculatePercentile(crimePerPersonValues, 90);
-		const maxValue = Math.max(...crimePerPersonValues);
+		const percentiles = [];
+
+		selectedFilters.forEach(filter => {
+			const lookup = lookupTable[sourceId];
+			if (lookup && lookup[filter]) {
+				const { perc10, perc50, perc90 } = lookup[filter];
+				percentiles.push({ perc10, perc50, perc90 });
+			}
+		});
+
+		const totalPerc10 = percentiles.reduce((sum, item) => sum + item.perc10, 0);
+		const totalPerc50 = percentiles.reduce((sum, item) => sum + item.perc50, 0);
+		const totalPerc90 = percentiles.reduce((sum, item) => sum + item.perc90, 0);
 
         map.setPaintProperty(`${sourceId}-fills`, 'fill-color', [
-            'interpolate',
-            ['linear'],
-            [
-                '/',
-                ['+',                    ...fields.map(field =>
-                        filters[field.key]
-                            ? ['coalesce', ['to-number', ['get', field.key]], 0]
-                            : 0
-                    )
-                ],
-                ['coalesce', ['to-number', ['get', 'population']], 1]
-            ],
-            0, 'rgba(0, 125, 0, 1)',
-            perc10, 'rgba(0, 255, 0, 1)',
-            perc50, 'rgba(255, 255, 0, 1)',
-            perc90, 'rgba(255, 0, 0, 1)',
-            maxValue, 'rgba(150, 0, 0, 1)'
-        ]);
-    }
+            'interpolate', ['linear'],
+            ['/', ['+', ...fields.map(field => filters[field.key]? ['coalesce', ['to-number', ['get', field.key]], 0]: 0)],
+                ['coalesce', ['to-number', ['get', 'population']], 1]],
+            totalPerc10, 'rgba(0, 255, 0, 1)', totalPerc50, 'rgba(255, 255, 0, 1)', totalPerc90, 'rgba(255, 0, 0, 1)']);
+        map.setPaintProperty(`${sourceId}-fills`, 'fill-opacity', 0.2);
+	}
 
         function removeExistingLayers() {
         const layers = ['Counties', 'LSOA', 'Ward'];
@@ -235,11 +280,20 @@
 
     map.on('load', () => {
         const dataSourceSelect = document.getElementById('data-source-select');
+        const loadingSpinner = document.getElementById('loading-spinner');
         addSourceAndLayers('Counties');
         dataSourceSelect.addEventListener('change', (e) => {
             const selectedSource = e.target.value;
+            loadingSpinner.style.display = 'block';
             removeExistingLayers();
             addSourceAndLayers(selectedSource);
+            setTimeout(() => {
+				updateFillColor();
+				console.log('Fill colors updated after delay');
+
+				loadingSpinner.style.display = 'none';
+			}, 10000);
+
         });
     });
 </script>
