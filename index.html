@@ -10,6 +10,11 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+	<!-- Ad Banner Container -->
+	<div id="ad-banner">
+		<!-- Replace with your actual Google AdSense code -->
+		<p>Advertisement</p>
+	</div>
 	<div id="map"></div>
 	<div class="filter-container">
 		<label for="data-source-select">Select Data Source:</label>
@@ -18,25 +23,36 @@
 			<option value="Ward">Middle layer (Ward)</option>
 			<option value="LSOA">Detailed view (LSOA)</option>
 		</select>
-		<button id="toggle-description">▼</button>
-		<p id="map-description" class="map-description">
-			This map displays crime rates between November 2023 - November 2024.<br>
-			Greater Manchester police declined a data request, as such their data is missing.<br>
-			Counties offer a broad overview, Wards provide a middle level of detail, and LSOA gives the most detailed breakdown.
-		</p>
+		<button id="toggle-description">🛈</button>
+
+		<!-- Description Modal -->
+		<div id="description-modal" class="popup-modal">
+		  <div class="popup-content">
+			<span id="close-description" class="popup-close">&times;</span>
+			<p class="map-description">
+			  This map displays crime rates between November 2023 - November 2024.<br>
+			  Greater Manchester police declined a data request, so their data is missing.<br>
+			  Counties offer a broad overview, Wards provide a middle level of detail, and LSOA gives the most detailed breakdown.
+			</p>
+		  </div>
+		</div>
 		<div id="loading-spinner" class="loading-spinner"></div>
 	</div>
 	<nav id="filter-group" class="filter-group"></nav>
 <script>
-	document.getElementById('toggle-description').addEventListener('click', function() {
-		const description = document.getElementById('map-description');
-		if (description.style.display === 'none' || description.style.display === '') {
-			description.style.display = 'block';
-			this.textContent = '▲'; // Arrow up when expanded
-		} else {
-			description.style.display = 'none';
-			this.textContent = '▼'; // Arrow down when collapsed
-		}
+	document.getElementById('toggle-description').addEventListener('click', function () {
+	  document.getElementById('description-modal').style.display = 'block';
+	});
+
+	document.getElementById('close-description').addEventListener('click', function () {
+	  document.getElementById('description-modal').style.display = 'none';
+	});
+
+	window.addEventListener('click', function (event) {
+	  const modal = document.getElementById('description-modal');
+	  if (event.target === modal) {
+		modal.style.display = 'none';
+	  }
 	});
 
     mapboxgl.accessToken = 'pk.eyJ1IjoiY21jY2FsbW9udCIsImEiOiJjbTU1cjRrZDQwcXFhMmlyMzRmcXQ2czlsIn0.geuByGMLkRs6ZBQoF8MWzw';
@@ -299,3 +315,4 @@
 </script>
 </body>
 </html>
+
