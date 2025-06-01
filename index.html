@@ -239,7 +239,8 @@
             const population = feature.properties.population || 0;
             const crimePerPerson = population > 0 ? ((allCrime / population) * 1000).toFixed(1) : 'N/A';
 
-            const urlToPreview = "https://www.awin.com";
+	    const urlToPreview = feature.properties.web_link || 'Unknown';
+	    const urlToPreview2 = "https://www.awin.com";
 
             fetch('/api/preview?url=' + encodeURIComponent(urlToPreview))
                 .then(res => res.json())
