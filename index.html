@@ -8,8 +8,19 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.9.1/mapbox-gl.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf"></script>
     <link rel="stylesheet" href="styles.css">
+
 </head>
 <body>
+    <header>
+        <h1>
+            <a href="https://www.awin1.com/cread.php?awinmid=3&awinaffid=1986163&ued=https%3A%2F%2Fwww.awin.com"
+               target="_blank"
+               rel="noopener noreferrer">
+               Crime-Map UK
+            </a>
+        </h1>
+    </header>
+
 	<div id="map"></div>
 	<div class="filter-container">
 		<label for="data-source-select">Select Data Source:</label>
@@ -34,6 +45,7 @@
 		<div id="loading-spinner" class="loading-spinner"></div>
 	</div>
 	<nav id="filter-group" class="filter-group"></nav>
+
 <script>
 	document.getElementById('toggle-description').addEventListener('click', function () {
 	  document.getElementById('description-modal').style.display = 'block';
@@ -42,6 +54,13 @@
 	document.getElementById('close-description').addEventListener('click', function () {
 	  document.getElementById('description-modal').style.display = 'none';
 	});
+
+	document.addEventListener('DOMContentLoaded', function () {
+		setTimeout(function () {
+			updateFillColor();
+	    }, 1000); // 1000 milliseconds = 1 second
+	});
+
 
 	window.addEventListener('click', function (event) {
 	  const modal = document.getElementById('description-modal');
@@ -129,7 +148,7 @@
 
 
     let filters = fields.reduce((acc, field) => {
-        acc[field.key] = false;
+        acc[field.key] = field.key === 'Violence and sexual offences';
         return acc;
     }, {});
 
@@ -149,8 +168,8 @@
         };
 
         map.addSource(source.id, {
-            'type': 'vector',
-            'url': source.url
+            type: 'vector',
+            url: source.url,
         });
 
         map.addLayer({
@@ -166,15 +185,20 @@
                 'fill-opacity': 0.2}});
 
         map.addLayer({
-            'id': `${source.id}-borders`,
-            'type': 'line',
-            'source': source.id,
+            id: `${source.id}-borders`,
+            type: 'line',
+            source: source.id,
             'source-layer': source.sourceLayer,
-            'layout': {},
-            'paint': {
-                'line-color': 'black',
-                'line-width': 2
-            }
+            layout: {},
+			paint: {
+				'line-color': 'black',
+				'line-width': [
+					'case',
+					['boolean', ['feature-state', 'selected'], false],
+					4,
+					1
+				]
+			}
         });
 
         while (filterGroup.firstChild) {
@@ -213,21 +237,64 @@
                 .filter(field => filters[field.key])
                 .reduce((sum, field) => sum + (feature.properties[field.key] || 0), 0);
             const population = feature.properties.population || 0;
-			const crimePerPerson = population > 0 ? ((allCrime / population) * 1000).toFixed(1) : 0;
+            const crimePerPerson = population > 0 ? ((allCrime / population) * 1000).toFixed(1) : 'N/A';
 
-            let description = `<strong>Area Name: ${areaName}</strong><br><hr>`;
-            description += fields
-                .filter(field => filters[field.key])
-                .map(field => `${field.label}: ${feature.properties[field.key] || 0}`)
-                .join('<br>');
-            description += `<br><strong>All Crime: ${allCrime}</strong>`;
-            description += `<br><strong>Population: ${population}</strong><hr>`;
-            description += `<strong>Crime </strong>(per 1000 per year): <strong>${crimePerPerson}</strong>`;
+            const urlToPreview = "https://www.awin.com";
 
-            new mapboxgl.Popup()
-                .setLngLat(coordinates)
-                .setHTML(description)
-                .addTo(map);
+            fetch('/api/preview?url=' + encodeURIComponent(urlToPreview))
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data);
+                    const previewHTML = `
+                        <a href="${data.url}" target="_blank" rel="noopener noreferrer"
+                           style="display: flex; align-items: center; gap: 10px; text-decoration: none; margin-top: 10px;">
+                            <img src="${data.image}" alt="${data.title}" style="width: 100px; height: 50px; object-fit: cover; border-radius: 4px;">
+                            <div>
+                                <div style="font-weight: bold;">${data.title}</div>
+                                <div style="font-size: 9px; color: #555;">${data.description}</div>
+                            </div>
+                        </a>`;
+
+                    const description = `
+                        <div style="font-family: Arial, sans-serif; font-size: 13px;">
+                            <h3 style="margin: 0;">${areaName}</h3>
+                            <hr style="margin: 4px 0;">
+                            <ul style="padding-left: 16px; margin: 0;">
+                                ${fields
+                                    .filter(field => filters[field.key])
+                                    .map(field => `<li>${field.label}: ${feature.properties[field.key] || 0}</li>`)
+                                    .join('')}
+                            </ul>
+                            <p style="margin: 6px 0;"><strong>Crime per 1000 people:</strong> ${crimePerPerson}</p>
+                            ${previewHTML}
+                        </div>`;
+
+                    new mapboxgl.Popup()
+                        .setLngLat(coordinates)
+                        .setHTML(description)
+                        .addTo(map);
+                })
+                .catch(err => {
+                    console.error("Failed to fetch preview", err);
+
+                    const fallbackDescription = `
+                        <div style="font-family: Arial, sans-serif; font-size: 13px;">
+                            <h3 style="margin: 0;">${areaName}</h3>
+                            <hr style="margin: 4px 0;">
+                            <ul style="padding-left: 16px; margin: 0;">
+                                ${fields
+                                    .filter(field => filters[field.key])
+                                    .map(field => `<li>${field.label}: ${feature.properties[field.key] || 0}</li>`)
+                                    .join('')}
+                            </ul>
+                            <p style="margin: 6px 0;"><strong>Crime per 1000 people:</strong> ${crimePerPerson}</p>
+                        </div>`;
+
+                    new mapboxgl.Popup()
+                        .setLngLat(coordinates)
+                        .setHTML(fallbackDescription)
+                        .addTo(map);
+                });
         });
 
         map.on('mouseenter', source.id + '-fills', () => {
@@ -301,10 +368,8 @@
             setTimeout(() => {
 				updateFillColor();
 				console.log('Fill colors updated after delay');
-
 				loadingSpinner.style.display = 'none';
-			}, 10000);
-
+			}, 1);
         });
     });
 </script>
