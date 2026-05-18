@@ -20,7 +20,10 @@
             <option value="LSOA">Detailed view (LSOA)</option>
         </select>
         <button id="toggle-description">🛈</button>
-
+        <div class="filter-container__row" style="margin-top:8px;">
+            <label for="border-toggle">Borders:</label>
+            <button id="border-toggle" class="toggle-btn active">On</button>
+        </div>
         <!-- Description Modal -->
         <div id="description-modal" class="popup-modal">
             <div class="popup-content">
@@ -73,36 +76,36 @@
 
     const lookupTable = {
 		LSOA: {
-			"Anti-social behaviour":            {perc10: 0.00306513409961686, perc50: 0.0166995701779164, perc90: 0.0276752767527675 },
-			"Bicycle theft":                    {perc10: 0, perc50: 0.00106512955501129, perc90: 0.0018450184501845 },
-			"Burglary":                         {perc10: 0.000766283524904215, perc50: 0.00448446359346536, perc90: 0.00738007380073801 },
-			"Criminal damage and arson":        {perc10: 0.00229885057471264, perc50: 0.00818898479840214, perc90: 0.0129151291512915 },
-			"Drugs":                            {perc10: 0, perc50: 0.00306782647963119, perc90: 0.00507380073800738 },
-			"Other crime":                      {perc10: 0, perc50: 0.00217539714585624, perc90: 0.003690036900369 },
-			"Other theft":                      {perc10: 0.00153256704980843, perc50: 0.00795462331976725, perc90: 0.0115313653136531 },
-			"Possession of weapons":            {perc10: 0, perc50: 0.000971992475888096, perc90: 0.0018450184501845 },
-			"Public order":                     {perc10: 0.00153256704980843, perc50: 0.00771059579502704, perc90: 0.0119926199261993 },
-			"Robbery":                          {perc10: 0, perc50: 0.00140515575879432, perc90: 0.00276752767527675 },
-			"Shoplifting":                      {perc10: 0, perc50: 0.00878143077596503, perc90: 0.0170664206642066 },
-			"Theft from the person":            {perc10: 0, perc50: 0.00253854187768559, perc90: 0.0018450184501845 },
-			"Vehicle crime":                    {perc10: 0.000766283524904215, perc50: 0.00646962536843284, perc90: 0.0106088560885609 },
-			"Violence and sexual offences":     {perc10: 0.0130268199233716, perc50: 0.0370560286600785, perc90: 0.0548892988929889 }
+			"Anti-social behaviour": {perc10: 0.0007756447547023463, perc50: 0.001282051282051282, perc90: 0.002904754624675126},
+            "Bicycle theft": {perc10: 0.0, perc50: 0.0005753739930955121, perc90: 0.0008673026886383347},
+            "Burglary": {perc10: 0.0005856212752764477, perc50: 0.0008311170212765958, perc90: 0.0012247237856993953},
+            "Criminal damage and arson": {perc10: 0.0006614654002713704, perc50: 0.0009689922480620155, perc90: 0.0015885623510722795},
+            "Drugs": {perc10: 0.0004664179104477612, perc50: 0.0007224389539083948, perc90: 0.001095690284879474},
+            "Other crime": {perc10: 0.00048514703687117485, perc50: 0.0006925207756232687, perc90: 0.000981767180925666},
+            "Other theft": {perc10: 0.0006269592476489029, perc50: 0.0008663634394628547, perc90: 0.0014156285390713476},
+            "Possession of weapons": {perc10: 0.0, perc50: 0.0006131207847946045, perc90: 0.0008656509695290858},
+            "Public order": {perc10: 0.0006341154090044388, perc50: 0.0009301870165475375, perc90: 0.001584685598377282},
+            "Robbery": {perc10: 0.0, perc50: 0.0005959475566150178, perc90: 0.0008875739644970414},
+            "Shoplifting": {perc10: 0.0, perc50: 0.0006311256311256311, perc90: 0.0020355292376017767},
+            "Theft from the person": {perc10: 0.0, perc50: 0.0005506607929515419, perc90: 0.0008207070707070708},
+            "Vehicle crime": {perc10: 0.0006214557601180766, perc50: 0.0009175842509175843, perc90: 0.0013859400802075962},
+            "Violence and sexual offences": {perc10: 0.0012634238787113076, perc50: 0.0022529379528709735, perc90: 0.005257488303294372}
 		},
 		Ward: {
-			"Anti-social behaviour":            {perc10: 0.00576036866359447, perc50: 0.0166995703782776, perc90: 0.0216994382022472 },
-			"Bicycle theft":                    {perc10: 0, perc50: 0.00106512959885317, perc90: 0.00140449438202247 },
-			"Burglary":                         {perc10: 0.00192012288786482, perc50: 0.00448446342647573, perc90: 0.00589887640449438 },
-			"Criminal damage and arson":        {perc10: 0.00384024577572965, perc50: 0.00818898462040925, perc90: 0.00976123595505618 },
-			"Drugs":                            {perc10: 0.000384024577572965, perc50: 0.00306782672027993, perc90: 0.00407303370786517 },
-			"Other crime":                      {perc10: 0.000768049155145929, perc50: 0.00217539725720443, perc90: 0.00252808988764045 },
-			"Other theft":                      {perc10: 0.00345622119815668, perc50: 0.00795462330076949, perc90: 0.00912921348314607 },
-			"Possession of weapons":            {perc10: 0, perc50: 0.000971992305685301, perc90: 0.0011938202247191 },
-			"Public order":                     {perc10: 0.00307219662058372, perc50: 0.00771059576241044, perc90: 0.00941011235955056 },
-			"Robbery":                          {perc10: 0, perc50: 0.00140515598776184, perc90: 0.00196629213483146 },
-			"Shoplifting":                      {perc10: 0, perc50: 0.00878143084836358, perc90: 0.0129213483146067 },
-			"Theft from the person":            {perc10: 0, perc50: 0.00253854207137589, perc90: 0.00140449438202247 },
-			"Vehicle crime":                    {perc10: 0.00153609831029186, perc50: 0.0064696253657251, perc90: 0.00919943820224719 },
-			"Violence and sexual offences":     {perc10: 0.0188172043010753, perc50: 0.0370560288101791, perc90: 0.0436095505617978 }
+			"Anti-social behaviour": {perc10: 0.000829801226285121, perc50: 0.0012943766525428417, perc90: 0.0026167541596217713},
+            "Bicycle theft": {perc10: 0.0, perc50: 0.00044829647340107593, perc90: 0.0007446352415551593},
+            "Burglary": {perc10: 0.0006224066390041494, perc50: 0.000817796430461488, perc90: 0.001070322460379698},
+            "Criminal damage and arson": {perc10: 0.0007186136443534545, perc50: 0.0009605124499878875, perc90: 0.0014363881624437505},
+            "Drugs": {perc10: 0.00048141729250914694, perc50: 0.0007117437722419929, perc90: 0.0009653106368085298},
+            "Other crime": {perc10: 0.0005224660397074191, perc50: 0.0006903353057199211, perc90: 0.0008798829941006483},
+            "Other theft": {perc10: 0.0006744526027037238, perc50: 0.0008759611863649841, perc90: 0.0012805463489057238},
+            "Possession of weapons": {perc10: 0.00030036795073965606, perc50: 0.0005523483714631887, perc90: 0.0007586856425282545},
+            "Public order": {perc10: 0.0006823461091753775, perc50: 0.0009232105282123205, perc90: 0.0014265130620171723},
+            "Robbery": {perc10: 0.0, perc50: 0.000461361014994233, perc90: 0.0007545326395892546},
+            "Shoplifting": {perc10: 0.00020661157024793388, perc50: 0.0006571798188874515, perc90: 0.0017240815772488038},
+            "Theft from the person": {perc10: 0.0, perc50: 0.00039840637450199205, perc90: 0.0007011967090501122},
+            "Vehicle crime": {perc10: 0.0006243114212265883, perc50: 0.0008816394153961461, perc90: 0.0012210363597493792},
+            "Violence and sexual offences": {perc10: 0.001391576731135305, perc50: 0.002280979421737679, perc90: 0.004494719863648171}
 		},
         Counties: {
             "Anti-social behaviour":        { perc10: 0.001066460628576798,   perc50: 0.001489042544111367,  perc90: 0.0024504635463915834 },
@@ -219,7 +222,9 @@
         });
 
         // ── Popup on click ──────────────────────────────────────────────────────
-        map.on('click', `${source.id}-fills`, (e) => {
+        //map.on('click', `${source.id}-fills`, (e) => {
+        if (window._crimeClickHandler) {['Counties', 'LSOA', 'Ward'].forEach(l => {try { map.off('click', `${l}-fills`, window._crimeClickHandler); } catch(e) {}});}
+        window._crimeClickHandler = (e) => {
 
             const feature = e.features[0];
             const coordinates = turf.centroid(feature).geometry.coordinates;
@@ -281,8 +286,8 @@
             } else {
                 showPopup(buildPopup());
             }
-        });
-
+        };
+        map.on('click', `${source.id}-fills`, window._crimeClickHandler);
         map.on('mouseenter', `${source.id}-fills`, () => { map.getCanvas().style.cursor = 'pointer'; });
         map.on('mouseleave', `${source.id}-fills`, () => { map.getCanvas().style.cursor = ''; });
     }
@@ -360,6 +365,20 @@
             setTimeout(() => {
                 loadingSpinner.style.display = 'none';
             }, 1500);
+        });
+
+            // ── Border toggle ───────────────────────────────────────────────────────
+        const borderToggle = document.getElementById('border-toggle');
+        let bordersVisible = true;
+        borderToggle.addEventListener('click', () => {
+            bordersVisible = !bordersVisible;
+            ['Counties', 'LSOA', 'Ward'].forEach(l => {
+                if (map.getLayer(`${l}-borders`)) {
+                    map.setLayoutProperty(`${l}-borders`, 'visibility', bordersVisible ? 'visible' : 'none');
+                }
+            });
+            borderToggle.textContent = bordersVisible ? 'On' : 'Off';
+            borderToggle.classList.toggle('active', bordersVisible);
         });
     });
 </script>
