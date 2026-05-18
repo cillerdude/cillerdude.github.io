@@ -270,3 +270,90 @@ body {
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
 }
+
+/* ════════════════════════════════════════
+   SEARCH BOX
+════════════════════════════════════════ */
+#search-input {
+    flex: 1;
+    background: #555555;
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 12px;
+    outline: none;
+    min-width: 0;
+}
+
+#search-input::placeholder {
+    color: #aaaaaa;
+}
+
+#search-input:focus {
+    border-color: #ffd700;
+}
+
+#search-btn {
+    background: rgba(255,255,255,0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 3px 7px;
+    flex-shrink: 0;
+}
+
+#search-btn:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: #ffd700;
+}
+
+#search-results {
+    margin-top: 4px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.search-result-item {
+    background: #4a4a4a;
+    color: #e0e0e0;
+    padding: 6px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background: #555555;
+    color: #ffd700;
+}
+
+/* ════════════════════════════════════════
+   BORDER TOGGLE BUTTON
+════════════════════════════════════════ */
+.toggle-btn {
+    background: rgba(255,255,255,0.1);
+    color: #aaaaaa;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 3px 10px;
+}
+
+.toggle-btn.active {
+    background: #2d6a2d;
+    color: #ffffff;
+    border-color: #2d6a2d;
+}
+
+.toggle-btn:hover {
+    border-color: #ffd700;
+}
